@@ -19,6 +19,6 @@ setup(
     license="MIT",
     install_requires=read_reqs("requirements.txt"),
     include_package_data=True,
-    version="0.1",
+    version="0.2",
     zip_safe=False,
 )
