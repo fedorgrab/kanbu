@@ -39,8 +39,9 @@ def confusion_matrix(labels, y, y_pred, scale=None):
             )
 
 
-def learner_evaluation(test_scores, train_scores, models):
-    fig, ax = plt.subplots(figsize=(9, 9))
+def learner_evaluation(
+    models, test_scores, train_scores, ax, title, hide_models_name=False
+):
     width = 0.3
 
     ax.barh(
@@ -48,7 +49,7 @@ def learner_evaluation(test_scores, train_scores, models):
         np.mean(test_scores, axis=1),
         width,
         yerr=np.std(test_scores, axis=1),
-        color="green",
+        # color="#2ecc71",
         label="test",
     )
     ax.barh(
@@ -56,7 +57,7 @@ def learner_evaluation(test_scores, train_scores, models):
         np.mean(train_scores, axis=1),
         width,
         yerr=np.std(train_scores, axis=1),
-        color="red",
+        # color="#34495e",
         label="train",
     )
 
@@ -75,15 +76,15 @@ def learner_evaluation(test_scores, train_scores, models):
             color="white",
             va="center",
         )
-
-    ax.set(
-        yticks=np.arange(len(train_scores)) - width / 2,
-        yticklabels=[c.__class__.__name__ for c in models],
+    y_labels = (
+        [""] * len(models)
+        if hide_models_name
+        else [c.__class__.__name__ for c in models]
     )
+    ax.set(yticks=np.arange(len(train_scores)) - width / 2, yticklabels=y_labels)
     ax.set_xlabel("Accuracy", fontsize=14)
+    ax.title.set_text(title)
     ax.legend(bbox_to_anchor=(1.05, 1), loc=2)
-
-    plt.show()
 
 
 def model_hyperparameters(gss, params):
