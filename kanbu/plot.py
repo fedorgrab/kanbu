@@ -5,9 +5,11 @@ from sklearn.metrics import confusion_matrix as conf_matrix
 
 
 def confusion_matrix(labels, y, y_pred, scale=None):
+    number_of_labels = len(labels)
     cm = conf_matrix(y, y_pred)
     fig, ax = plt.subplots()
     cm_scaled = None
+
     if scale:
         cm_scaled = cm.copy()
         cm_scaled[cm_scaled < cm_scaled.max() / 3] = (
@@ -18,21 +20,23 @@ def confusion_matrix(labels, y, y_pred, scale=None):
         ax.imshow(cm, cmap=plt.cm.hot_r)
 
     else:
-        ax.imshow(cm_scaled)
+        ax.imshow(cm_scaled, cmap=plt.cm.hot_r)
 
     ax.grid(False)
-    ax.set_xticks(np.arange(10)), ax.set_yticks(np.arange(10))
+    ax.set_xticks(np.arange(number_of_labels)), ax.set_yticks(
+        np.arange(number_of_labels)
+    )
     ax.set_xticklabels(labels, rotation=45, ha="right")
     ax.set_yticklabels(labels)
     ax.set_ylabel("True")
     ax.set_xlabel("Predicted")
 
-    for i in range(100):
-        if cm[i % 10, int(i / 10)]:
+    for i in range(number_of_labels ** 2):
+        if cm[i % number_of_labels, int(i / number_of_labels)]:
             ax.text(
-                int(i / 10),
-                i % 10,
-                cm[i % 10, int(i / 10)],
+                int(i / number_of_labels),
+                i % number_of_labels,
+                cm[i % number_of_labels, int(i / number_of_labels)],
                 ha="center",
                 va="center",
                 color="red",
@@ -98,6 +102,8 @@ def model_hyperparameters(gss, params):
 
         if type(gs.param_grid[param_name][0]) == Product:
             x = [k.k1.constant_value for k in gs.param_grid[param_name]]
+        elif type(gs.param_grid[param_name][0]) == tuple:
+            x = range(len(gs.param_grid[param_name]))
         else:
             x = gs.param_grid[param_name]
 
@@ -110,6 +116,10 @@ def model_hyperparameters(gss, params):
         ax.set_xlabel(f"Best {param_name} is {best_param} with accuracy {accuracy}")
         ax.set_title(gs.best_estimator_.__class__.__name__, fontsize=14)
         ax.legend()
+        classifier_name = gs.best_estimator_.__class__.__name__
 
-        if gs.best_estimator_.__class__.__name__ != "KNeighborsClassifier":
+        if (
+            classifier_name == "LogisticRegression"
+            or classifier_name == "LinearRegression"
+        ):
             ax.set_xscale("log")
